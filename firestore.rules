@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'admin@keralarate.app';
+    }
+
+    // Anyone can READ products (farmers & traders across India)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin config (market message) — public read, admin write
+    match /admin/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // FCM tokens — any client may register its own device token
+    match /users/{token} {
+      allow read, write: if true;
+    }
+
+    // Push notification queue — admin creates, Cloud Function processes
+    match /notifications/{notificationId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

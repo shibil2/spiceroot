@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "108406995110",
+    "project_id": "kerala-rate",
+    "storage_bucket": "kerala-rate.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108406995110:android:337e2342876f26b7a15c67",
+        "android_client_info": {
+          "package_name": "com.example.spiceroot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjHFZzIFSOy41A8KlpFxw5ab_XoJzbBS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

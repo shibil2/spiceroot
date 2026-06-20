@@ -23,9 +23,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -51,9 +49,9 @@ class KeralaRateApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WatchlistProvider()..init()),
         ChangeNotifierProvider(create: (_) => AlertsProvider()..init()),
         ChangeNotifierProvider(
-          create: (ctx) => PriceProvider(
-            notifications: ctx.read<NotificationService>(),
-          )..init(),
+          create: (ctx) =>
+              PriceProvider(notifications: ctx.read<NotificationService>())
+                ..init(),
         ),
       ],
       child: MaterialApp(
@@ -62,6 +60,32 @@ class KeralaRateApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         home: const MainShell(),
+      ),
+    );
+  }
+}
+
+/// Minimal app used by widget tests.
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int _counter = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Test App')),
+        body: Center(child: Text('$_counter')),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => setState(() => _counter++),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

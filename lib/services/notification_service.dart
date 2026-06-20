@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,10 +20,10 @@ class NotificationService {
     FlutterLocalNotificationsPlugin? localNotifications,
     FirebaseFirestore? firestore,
     FirestoreService? firestoreService,
-  })  : _messaging = messaging ?? FirebaseMessaging.instance,
-        _local = localNotifications ?? FlutterLocalNotificationsPlugin(),
-        _db = firestore ?? FirebaseFirestore.instance,
-        _firestoreService = firestoreService ?? FirestoreService();
+  }) : _messaging = messaging ?? FirebaseMessaging.instance,
+       _local = localNotifications ?? FlutterLocalNotificationsPlugin(),
+       _db = firestore ?? FirebaseFirestore.instance,
+       _firestoreService = firestoreService ?? FirestoreService();
 
   final FirebaseMessaging _messaging;
   final FlutterLocalNotificationsPlugin _local;
@@ -75,8 +74,10 @@ class NotificationService {
     );
 
     if (Platform.isAndroid) {
-      final androidPlugin = _local.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin = _local
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       await androidPlugin?.createNotificationChannel(
         const AndroidNotificationChannel(
           kNotificationChannelId,
@@ -93,15 +94,12 @@ class NotificationService {
     final alreadyRequested = prefs.getBool(_permissionRequestedKey) ?? false;
 
     if (!alreadyRequested) {
-      await _messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      await _messaging.requestPermission(alert: true, badge: true, sound: true);
       if (Platform.isIOS) {
         await _local
             .resolvePlatformSpecificImplementation<
-                IOSFlutterLocalNotificationsPlugin>()
+              IOSFlutterLocalNotificationsPlugin
+            >()
             ?.requestPermissions(alert: true, badge: true, sound: true);
       }
       await prefs.setBool(_permissionRequestedKey, true);
@@ -120,30 +118,23 @@ class NotificationService {
   }
 
   Future<void> _saveTokenToFirestore(String token) async {
-    await _db.collection('users').doc(token).set(
-      {
-        'token': token,
-        'platform': Platform.isIOS ? 'ios' : 'android',
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _db.collection('users').doc(token).set({
+      'token': token,
+      'platform': Platform.isIOS ? 'ios' : 'android',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   void _onForegroundMessage(RemoteMessage message) {
-    final title = message.notification?.title ??
+    final title =
+        message.notification?.title ??
         message.data['title'] as String? ??
         'Kerala Rate';
-    final body = message.notification?.body ??
-        message.data['body'] as String? ??
-        '';
+    final body =
+        message.notification?.body ?? message.data['body'] as String? ?? '';
     final productId = message.data['productId'] as String?;
 
-    showLocalBanner(
-      title: title,
-      body: body,
-      productId: productId,
-    );
+    showLocalBanner(title: title, body: body, productId: productId);
   }
 
   void _onMessageOpened(RemoteMessage message) {
@@ -172,9 +163,7 @@ class NotificationService {
     if (!nav.mounted) return;
 
     nav.push(
-      MaterialPageRoute<void>(
-        builder: (_) => DetailScreen(product: product!),
-      ),
+      MaterialPageRoute<void>(builder: (_) => DetailScreen(product: product!)),
     );
   }
 
@@ -222,10 +211,6 @@ class NotificationService {
         '$productName reached ${FormatUtils.price(currentPrice)}/$unit, '
         'your target was ${FormatUtils.price(targetPrice)}';
 
-    await showLocalBanner(
-      title: title,
-      body: body,
-      productId: productId,
-    );
+    await showLocalBanner(title: title, body: body, productId: productId);
   }
 }

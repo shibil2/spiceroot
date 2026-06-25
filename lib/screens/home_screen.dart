@@ -131,7 +131,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-              _MarketMoodBanner(mood: provider.marketMood, showMl: showMl),
+              if (provider.errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Card(
+                    color: Colors.red.shade100,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'Error loading prices: ${provider.errorMessage}',
+                        style: const TextStyle(fontSize: 13, color: Colors.red),
+                      ),
+                    ),
+                  ),
+                ),
+              if (provider.allProducts.isNotEmpty)
+                _MarketMoodBanner(mood: provider.marketMood, showMl: showMl),
               _FilterChipsRow(
                 labels: PriceProvider.filterLabels,
                 active: provider.activeFilter,

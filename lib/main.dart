@@ -2,10 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spiceroot/screens/home_screen.dart';
 
+import 'di.dart';
 import 'firebase_options.dart';
 import 'providers/alerts_provider.dart';
-import 'providers/price_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/watchlist_provider.dart';
 import 'services/auth_service.dart';
@@ -35,7 +36,11 @@ Future<void> main() async {
     debugPrint('NotificationService init failed: $e\n$st');
   }
 
-  runApp(KeralaRateApp(notificationService: notificationService));
+  runApp(
+    AppProviders(
+      child: KeralaRateApp(notificationService: notificationService),
+    ),
+  );
 }
 
 class KeralaRateApp extends StatelessWidget {
@@ -52,17 +57,13 @@ class KeralaRateApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsProvider()..init()),
         ChangeNotifierProvider(create: (_) => WatchlistProvider()..init()),
         ChangeNotifierProvider(create: (_) => AlertsProvider()..init()),
-        ChangeNotifierProvider(
-          create: (_) =>
-              PriceProvider(notifications: notificationService)..init(),
-        ),
       ],
       child: MaterialApp(
         navigatorKey: _navigatorKey,
         title: 'Kerala Rate',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
-        home: const MainShell(),
+        home: const HomeScreen(),
       ),
     );
   }

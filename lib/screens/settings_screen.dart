@@ -55,8 +55,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           const Divider(),
           _SectionHeader(
-            title:
-                settings.showMalayalam ? 'Notifications' : 'Notifications',
+            title: settings.showMalayalam ? 'Notifications' : 'Notifications',
           ),
           SwitchListTile(
             title: const Text('Price alert notifications'),
@@ -71,9 +70,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text('Kerala Rate'),
             subtitle: Text('Version v1.0.0'),
           ),
-          const ListTile(
-            subtitle: Text('Made for Kerala farmers & traders'),
-          ),
+          const ListTile(subtitle: Text('Made for Kerala farmers & traders')),
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -133,9 +130,9 @@ class SettingsScreen extends StatelessWidget {
     if (ok == true && context.mounted) {
       await context.read<PriceProvider>().clearCache();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cache cleared')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Cache cleared')));
       }
     }
   }

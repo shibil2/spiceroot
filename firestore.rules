@@ -4,7 +4,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.email == 'admin@keralarate.app';
+        && request.auth.token.email == 'shammasshifu@gmail.com';
     }
 
     // Anyone can READ products (farmers & traders across India)

@@ -22,12 +22,12 @@ class _MainShellState extends State<MainShell> {
 
   static const _tabs = [
     (icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
+    (icon: Icons.bookmark_border, active: Icons.bookmark, label: 'Watchlist'),
     (
-      icon: Icons.bookmark_border,
-      active: Icons.bookmark,
-      label: 'Watchlist'
+      icon: Icons.notifications_outlined,
+      active: Icons.notifications,
+      label: 'Alerts',
     ),
-    (icon: Icons.notifications_outlined, active: Icons.notifications, label: 'Alerts'),
     (icon: Icons.settings_outlined, active: Icons.settings, label: 'Settings'),
   ];
 
@@ -60,10 +60,7 @@ class _MainShellState extends State<MainShell> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: screens,
-      ),
+      body: IndexedStack(index: _index, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         backgroundColor: AppTheme.cardColor,
@@ -74,16 +71,10 @@ class _MainShellState extends State<MainShell> {
           final isAlerts = i == 2;
           return NavigationDestination(
             icon: isAlerts && alertCount > 0
-                ? Badge(
-                    label: Text('$alertCount'),
-                    child: Icon(tab.icon),
-                  )
+                ? Badge(label: Text('$alertCount'), child: Icon(tab.icon))
                 : Icon(tab.icon),
             selectedIcon: isAlerts && alertCount > 0
-                ? Badge(
-                    label: Text('$alertCount'),
-                    child: Icon(tab.active),
-                  )
+                ? Badge(label: Text('$alertCount'), child: Icon(tab.active))
                 : Icon(tab.active),
             label: tab.label,
           );

@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../data/price_data.dart';
-import '../models/admin_config.dart';
-import '../models/product_model.dart';
+import '../data/models/admin_config.dart';
+import '../data/models/product_model.dart';
 
 class FirestoreService {
   FirestoreService({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
@@ -17,13 +18,19 @@ class FirestoreService {
 
   /// Real-time stream of all products (home screen listens to this).
   Stream<List<ProductModel>> productsStream() {
-    return _db.collection(productsCollection).snapshots().map(
-          (snap) => snap.docs
-              .where((doc) => doc.exists)
-              .map(ProductModel.fromFirestore)
-              .toList()
-            ..sort((a, b) => a.nameEn.compareTo(b.nameEn)),
-        );
+    return _db.collection(productsCollection).snapshots().map((snap) {
+      final products = <ProductModel>[];
+      for (final doc in snap.docs) {
+        if (!doc.exists) continue;
+        try {
+          products.add(ProductModel.fromFirestore(doc));
+        } catch (e) {
+          debugPrint('Skipping invalid product "${doc.id}": $e');
+        }
+      }
+      products.sort((a, b) => a.nameEn.compareTo(b.nameEn));
+      return products;
+    });
   }
 
   /// Fetch single product with history.
@@ -66,10 +73,10 @@ class FirestoreService {
       'lastUpdated': FieldValue.serverTimestamp(),
     };
     if (updatedBy != null) patch['updatedBy'] = updatedBy;
-    await _db.collection(adminCollection).doc(adminConfigDoc).set(
-          patch,
-          SetOptions(merge: true),
-        );
+    await _db
+        .collection(adminCollection)
+        .doc(adminConfigDoc)
+        .set(patch, SetOptions(merge: true));
   }
 
   /// Market message for home screen banner.
@@ -79,17 +86,17 @@ class FirestoreService {
 
   /// Admin config (last updated, market message, etc.).
   Stream<AdminConfig?> adminConfigStream() {
-    return _db.collection(adminCollection).doc(adminConfigDoc).snapshots().map(
-      (doc) {
-        if (!doc.exists) return null;
-        final data = doc.data()!;
-        return AdminConfig(
-          lastUpdated: (data['lastUpdated'] as Timestamp?)?.toDate(),
-          updatedBy: data['updatedBy'] as String? ?? '',
-          marketMessage: data['marketMessage'] as String? ?? '',
-        );
-      },
-    );
+    return _db.collection(adminCollection).doc(adminConfigDoc).snapshots().map((
+      doc,
+    ) {
+      if (!doc.exists) return null;
+      final data = doc.data()!;
+      return AdminConfig(
+        lastUpdated: (data['lastUpdated'] as Timestamp?)?.toDate(),
+        updatedBy: data['updatedBy'] as String? ?? '',
+        marketMessage: data['marketMessage'] as String? ?? '',
+      );
+    });
   }
 
   /// Publishes today's market message for all users (home banner).
@@ -97,14 +104,11 @@ class FirestoreService {
     required String message,
     required String updatedBy,
   }) async {
-    await _db.collection(adminCollection).doc(adminConfigDoc).set(
-      {
-        'marketMessage': message.trim(),
-        'lastUpdated': FieldValue.serverTimestamp(),
-        'updatedBy': updatedBy,
-      },
-      SetOptions(merge: true),
-    );
+    await _db.collection(adminCollection).doc(adminConfigDoc).set({
+      'marketMessage': message.trim(),
+      'lastUpdated': FieldValue.serverTimestamp(),
+      'updatedBy': updatedBy,
+    }, SetOptions(merge: true));
   }
 
   static const String notificationsCollection = 'notifications';
@@ -118,8 +122,9 @@ class FirestoreService {
     required double newPrice,
     required String updatedBy,
   }) async {
-    final changePct =
-        oldPrice == 0 ? 0.0 : ((newPrice - oldPrice) / oldPrice * 100).abs();
+    final changePct = oldPrice == 0
+        ? 0.0
+        : ((newPrice - oldPrice) / oldPrice * 100).abs();
 
     await _db.collection(notificationsCollection).add({
       'type': 'price_change',
@@ -167,14 +172,10 @@ class FirestoreService {
       });
     }
 
-    batch.set(
-      _db.collection(adminCollection).doc(adminConfigDoc),
-      {
-        'lastUpdated': FieldValue.serverTimestamp(),
-        'updatedBy': updatedBy,
-      },
-      SetOptions(merge: true),
-    );
+    batch.set(_db.collection(adminCollection).doc(adminConfigDoc), {
+      'lastUpdated': FieldValue.serverTimestamp(),
+      'updatedBy': updatedBy,
+    }, SetOptions(merge: true));
 
     await batch.commit();
   }
@@ -182,8 +183,7 @@ class FirestoreService {
   /// One-time seed of mock Kerala products + admin config (dev/setup).
   Future<void> seedDatabase({
     String updatedBy = 'admin@keralarate.app',
-    String marketMessage =
-        'Arecanut arrivals high at Mangaluru APMC today',
+    String marketMessage = 'Arecanut arrivals high at Mangaluru APMC today',
   }) async {
     final now = DateTime.now();
     final batch = _db.batch();
@@ -191,10 +191,8 @@ class FirestoreService {
     final admin = _db.collection(adminCollection).doc(adminConfigDoc);
 
     for (final product in keralaProducts) {
-      final weekHigh =
-          product.weekHistory.reduce((a, b) => a > b ? a : b);
-      final weekLow =
-          product.weekHistory.reduce((a, b) => a < b ? a : b);
+      final weekHigh = product.weekHistory.reduce((a, b) => a > b ? a : b);
+      final weekLow = product.weekHistory.reduce((a, b) => a < b ? a : b);
 
       batch.set(products.doc(product.id), {
         'nameEn': product.nameEn,

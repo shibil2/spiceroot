@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../models/product_model.dart';
+import '../../data/models/product_model.dart';
 import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
 

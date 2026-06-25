@@ -115,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Clear cached data?'),
         content: const Text(
-          'This removes saved price cache and reloads fresh mock data.',
+          'This removes saved price cache. Live Firestore prices will reload.',
         ),
         actions: [
           TextButton(

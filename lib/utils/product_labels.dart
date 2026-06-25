@@ -1,4 +1,4 @@
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 
 abstract final class ProductLabels {
   static String primaryName(ProductModel p, bool showMalayalam) {

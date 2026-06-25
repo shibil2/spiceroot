@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../models/product_model.dart';
+import 'models/product_model.dart';
 
 /// All Kerala commodity mock prices (30-day history per product).
 final List<ProductModel> keralaProducts = _buildProducts();
@@ -181,17 +181,17 @@ List<double> _generateMonthHistory({
   final decimals = currentPrice < 50 ? 1 : 0;
 
   // Start ~2–3 weeks ago near mid-range with product-specific offset.
-  double price = (minPrice + maxPrice) / 2 +
-      (rng.nextDouble() - 0.5) * span * 0.35;
+  double price =
+      (minPrice + maxPrice) / 2 + (rng.nextDouble() - 0.5) * span * 0.35;
   price = price.clamp(minPrice, maxPrice);
 
   final history = <double>[];
 
   for (var day = 0; day < days - 1; day++) {
     // Gentle pull toward today's market level plus daily noise.
-    final targetDrift = (currentPrice - price) * (0.04 + rng.nextDouble() * 0.03);
-    final seasonal =
-        sin(day / 5.5 + seed * 0.1) * span * 0.012; // slow wave
+    final targetDrift =
+        (currentPrice - price) * (0.04 + rng.nextDouble() * 0.03);
+    final seasonal = sin(day / 5.5 + seed * 0.1) * span * 0.012; // slow wave
     final shock = (rng.nextDouble() - 0.5) * span * 0.045;
     price = (price + targetDrift + seasonal + shock).clamp(minPrice, maxPrice);
     history.add(_roundPrice(price, decimals));
@@ -199,13 +199,13 @@ List<double> _generateMonthHistory({
 
   // Yesterday: small step from second-to-last generated day toward today.
   final lastGenerated = history.isNotEmpty ? history.last : price;
-  var yesterday = lastGenerated +
+  var yesterday =
+      lastGenerated +
       (currentPrice - lastGenerated) * (0.35 + rng.nextDouble() * 0.25) +
       (rng.nextDouble() - 0.5) * span * 0.02;
   yesterday = yesterday.clamp(minPrice, maxPrice);
   if ((yesterday - currentPrice).abs() < span * 0.008) {
-    yesterday = currentPrice +
-        (rng.nextDouble() > 0.5 ? 1 : -1) * span * 0.015;
+    yesterday = currentPrice + (rng.nextDouble() > 0.5 ? 1 : -1) * span * 0.015;
     yesterday = yesterday.clamp(minPrice, maxPrice);
   }
 

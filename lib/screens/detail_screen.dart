@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../data/market_info.dart';
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/format_utils.dart';
@@ -63,12 +63,18 @@ class _DetailScreenState extends State<DetailScreen> {
     final settings = context.watch<SettingsProvider>();
     final showMl = settings.showMalayalam;
     final market = marketInfoFor(product);
-    final todayHigh = product.weekHistory.reduce((a, b) => a > b ? a : b);
-    final todayLow = product.weekHistory.reduce((a, b) => a < b ? a : b);
-    final monthHigh =
-        product.monthHistory.reduce((a, b) => a > b ? a : b);
-    final monthLow =
-        product.monthHistory.reduce((a, b) => a < b ? a : b);
+    final todayHigh = product.weekHistory.isNotEmpty
+        ? product.weekHistory.reduce((a, b) => a > b ? a : b)
+        : product.currentPrice;
+    final todayLow = product.weekHistory.isNotEmpty
+        ? product.weekHistory.reduce((a, b) => a < b ? a : b)
+        : product.currentPrice;
+    final monthHigh = product.monthHistory.isNotEmpty
+        ? product.monthHistory.reduce((a, b) => a > b ? a : b)
+        : product.currentPrice;
+    final monthLow = product.monthHistory.isNotEmpty
+        ? product.monthHistory.reduce((a, b) => a < b ? a : b)
+        : product.currentPrice;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -312,10 +318,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),

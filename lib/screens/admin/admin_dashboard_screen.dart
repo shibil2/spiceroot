@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/admin_config.dart';
-import '../../models/product_model.dart';
+import '../../data/models/admin_config.dart';
+import '../../data/models/product_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
@@ -58,8 +58,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         : ((newPrice - oldPrice) / oldPrice * 100).abs();
     if (changePct <= 5) return;
 
-    final updatedBy =
-        context.read<AuthService>().currentUser?.email ?? 'admin';
+    final updatedBy = context.read<AuthService>().currentUser?.email ?? 'admin';
 
     final send = await showDialog<bool>(
       context: context,
@@ -206,8 +205,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final updatedBy =
-        context.read<AuthService>().currentUser?.email ?? 'admin';
+    final updatedBy = context.read<AuthService>().currentUser?.email ?? 'admin';
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -307,7 +305,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       itemBuilder: (context, index) {
                         final product = products[index];
                         return AdminProductTile(
-                          key: ValueKey('${product.id}_${product.currentPrice}'),
+                          key: ValueKey(
+                            '${product.id}_${product.currentPrice}',
+                          ),
                           product: product,
                           firestore: _firestore,
                           updatedBy: updatedBy,
@@ -362,10 +362,7 @@ class _MarketMessageSection extends StatelessWidget {
         children: [
           const Text(
             'Publish Market Message',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(

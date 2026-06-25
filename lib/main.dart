@@ -29,7 +29,11 @@ Future<void> main() async {
 
   final notificationService = NotificationService();
   notificationService.setNavigatorKey(_navigatorKey);
-  await notificationService.init();
+  try {
+    await notificationService.init();
+  } catch (e, st) {
+    debugPrint('NotificationService init failed: $e\n$st');
+  }
 
   runApp(KeralaRateApp(notificationService: notificationService));
 }
@@ -49,9 +53,8 @@ class KeralaRateApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WatchlistProvider()..init()),
         ChangeNotifierProvider(create: (_) => AlertsProvider()..init()),
         ChangeNotifierProvider(
-          create: (ctx) =>
-              PriceProvider(notifications: ctx.read<NotificationService>())
-                ..init(),
+          create: (_) =>
+              PriceProvider(notifications: notificationService)..init(),
         ),
       ],
       child: MaterialApp(

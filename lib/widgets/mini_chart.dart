@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../theme/app_theme.dart';
 
 class MiniChart extends StatelessWidget {
@@ -13,14 +13,21 @@ class MiniChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final history = product.weekHistory;
     if (history.isEmpty) {
-      return const SizedBox(height: 40);
+      return Container(
+        height: 40,
+        alignment: Alignment.center,
+        child: const Text(
+          'No history',
+          style: TextStyle(fontSize: 10, color: AppTheme.stableColor),
+        ),
+      );
     }
 
     final lineColor = product.isUp
         ? AppTheme.priceUpColor
         : product.isDown
-            ? AppTheme.priceDownColor
-            : AppTheme.stableColor;
+        ? AppTheme.priceDownColor
+        : AppTheme.stableColor;
 
     final spots = List<FlSpot>.generate(
       history.length,

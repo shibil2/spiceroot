@@ -1,10 +1,7 @@
-import '../models/product_model.dart';
+import 'models/product_model.dart';
 
 class MarketInfo {
-  const MarketInfo({
-    required this.markets,
-    required this.arrival,
-  });
+  const MarketInfo({required this.markets, required this.arrival});
 
   final List<String> markets;
   final String arrival;

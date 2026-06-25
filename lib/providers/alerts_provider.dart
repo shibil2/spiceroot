@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/price_alert_model.dart';
+import '../data/models/price_alert_model.dart';
 
 class AlertsProvider extends ChangeNotifier {
   static const String storageKey = 'price_alerts_json';

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/price_data.dart';
-import '../models/price_alert_model.dart';
+import '../data/models/price_alert_model.dart';
 import '../providers/alerts_provider.dart';
+import '../providers/price_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/format_utils.dart';
@@ -24,8 +25,8 @@ class AlertsScreen extends StatelessWidget {
         onPressed: () => _showCreateSheet(context),
         child: const Icon(Icons.add),
       ),
-      body: Consumer<AlertsProvider>(
-        builder: (context, alerts, _) {
+      body: Consumer2<AlertsProvider, PriceProvider>(
+        builder: (context, alerts, prices, _) {
           if (!alerts.isLoaded) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -55,7 +56,7 @@ class AlertsScreen extends StatelessWidget {
             separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final alert = alerts.alerts[index];
-              final product = productById(alert.productId);
+              final product = prices.productById(alert.productId);
               final name = product?.nameEn ?? alert.productId;
               final ml = settings.showMalayalam && product != null
                   ? ' (${product.nameMl})'

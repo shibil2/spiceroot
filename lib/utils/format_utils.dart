@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 
 abstract final class FormatUtils {
   static final NumberFormat _inr = NumberFormat.currency(

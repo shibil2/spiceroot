@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/format_utils.dart';
@@ -18,7 +18,7 @@ class AdminProductTile extends StatefulWidget {
   final ProductModel product;
   final FirestoreService firestore;
   final void Function(ProductModel product, double oldPrice, double newPrice)
-      onPriceUpdated;
+  onPriceUpdated;
   final String? updatedBy;
 
   @override

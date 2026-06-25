@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../screens/detail_screen.dart';
 import '../services/firestore_service.dart';
 import '../utils/format_utils.dart';
@@ -39,19 +38,30 @@ class NotificationService {
   }
 
   Future<void> init() async {
-    await _initLocalNotifications();
-    await _requestPermissionOnFirstLaunch();
-    await _registerToken();
-    _messaging.onTokenRefresh.listen(_saveTokenToFirestore);
+    try {
+      await _initLocalNotifications();
+    } catch (e, st) {
+      debugPrint('Local notifications init failed: $e\n$st');
+    }
 
-    FirebaseMessaging.onMessage.listen(_onForegroundMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpened);
+    if (kIsWeb) return;
 
-    final initial = await _messaging.getInitialMessage();
-    if (initial != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _handleNavigation(initial);
-      });
+    try {
+      await _requestPermissionOnFirstLaunch();
+      await _registerToken();
+      _messaging.onTokenRefresh.listen(_saveTokenToFirestore);
+
+      FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpened);
+
+      final initial = await _messaging.getInitialMessage();
+      if (initial != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleNavigation(initial);
+        });
+      }
+    } catch (e, st) {
+      debugPrint('FCM init failed: $e\n$st');
     }
   }
 
@@ -73,7 +83,7 @@ class NotificationService {
       },
     );
 
-    if (Platform.isAndroid) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
       final androidPlugin = _local
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
@@ -95,7 +105,7 @@ class NotificationService {
 
     if (!alreadyRequested) {
       await _messaging.requestPermission(alert: true, badge: true, sound: true);
-      if (Platform.isIOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         await _local
             .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin
@@ -118,9 +128,15 @@ class NotificationService {
   }
 
   Future<void> _saveTokenToFirestore(String token) async {
+    final platform = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.android => 'android',
+      _ => 'other',
+    };
+
     await _db.collection('users').doc(token).set({
       'token': token,
-      'platform': Platform.isIOS ? 'ios' : 'android',
+      'platform': platform,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -173,29 +189,33 @@ class NotificationService {
     required String body,
     String? productId,
   }) async {
-    final id = productId?.hashCode ?? DateTime.now().millisecondsSinceEpoch;
+    try {
+      final id = productId?.hashCode ?? DateTime.now().millisecondsSinceEpoch;
 
-    await _local.show(
-      id.remainder(100000),
-      title,
-      body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          kNotificationChannelId,
-          'Price Updates',
-          channelDescription: 'Price changes and market alerts',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+      await _local.show(
+        id.remainder(100000),
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            kNotificationChannelId,
+            'Price Updates',
+            channelDescription: 'Price changes and market alerts',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      payload: productId,
-    );
+        payload: productId,
+      );
+    } catch (e) {
+      debugPrint('showLocalBanner failed: $e');
+    }
   }
 
   /// User price-alert notification (triggered locally by PriceProvider).
